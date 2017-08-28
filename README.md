@@ -37,7 +37,8 @@ header('Location: '.$oauth_client->getAuthUrl($redirect_uri,'basic_info'));
  ## 商家类型会员授权
 
  ```
- header('Location: '.$oauth_client->getAuthUrl($redirect_uri,'basic_info+points'));
+ //多个scope时，空格隔开
+ header('Location: '.$oauth_client->getAuthUrl($redirect_uri,'basic_info points'));
  ```
  ## 将普通会员授权/商家类型会员授权同意得到的code换取成token
 
