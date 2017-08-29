@@ -18,6 +18,10 @@
  # 基本用法
 
  ```
+ <?php 
+ 
+ namespace YunLianHui;
+ 
  require 'OAuth2.php';
  require 'Request.php';
  require 'Response.php';
