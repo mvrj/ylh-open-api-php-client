@@ -21,6 +21,7 @@
  require 'OAuth2.php';
  require 'Request.php';
  require 'Response.php';
+ require 'ApiException.php';
 
  $client_id = 'YLH'; //需要更换
  $client_secret = 'YLH123';////需要更换
