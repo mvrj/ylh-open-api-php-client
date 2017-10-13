@@ -4,10 +4,10 @@ require 'src/autoload.php';
 
 use YunLianHui\OAuth2;
 
-$client_id = 'Allen';
-$client_secret = 'Allen';
-$redirect_uri = 'https://docs.yunlianhui.com/back.php';
-$client_private_key = '556696225889555';
+$client_id = '{client_id}';
+$client_secret = '{client_secret}';
+$redirect_uri = '{redirect_uri}';
+$client_private_key = '{client_private_key}';
 
 $oauth_client = new OAuth2($client_id,$client_secret,$client_private_key,$redirect_uri);
 
