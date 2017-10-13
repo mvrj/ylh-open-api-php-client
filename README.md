@@ -18,9 +18,14 @@ __
  # 基本用法
 
  ```
+ <?php 
+ 
+ namespace YunLianHui;
+ 
  require 'OAuth2.php';
  require 'Request.php';
  require 'Response.php';
+ require 'ApiException.php';
 
  $client_id = 'YLH'; //需要更换
  $client_secret = 'YLH123';////需要更换
@@ -37,7 +42,8 @@ header('Location: '.$oauth_client->getAuthUrl($redirect_uri,'basic_info'));
  ## 商家类型会员授权
 
  ```
- header('Location: '.$oauth_client->getAuthUrl($redirect_uri,'basic_info+points'));
+ //多个scope时，空格隔开
+ header('Location: '.$oauth_client->getAuthUrl($redirect_uri,'basic_info points'));
  ```
  ## 将普通会员授权/商家类型会员授权同意得到的code换取成token
 
