@@ -12,26 +12,18 @@
  - 普通会员/商家类型会员授权得到的token是获取普通会员/商家类型会员的资源(基本信息，账户信息，发放积分操作[限商家类型会员]等操作)
  - 客户端token是客户端自身的资源(目前有：快捷注册[提供手机号，填写推荐人，将自动产生一个会员])
 
- # 用法
-
-__
  # 基本用法
 
  ```
  <?php 
- 
- namespace YunLianHui;
- 
- require 'OAuth2.php';
- require 'Request.php';
- require 'Response.php';
- require 'ApiException.php';
+     require_once __DIR__ . '/vendor/autoload.php';
 
- $client_id = 'YLH'; //需要更换
- $client_secret = 'YLH123';////需要更换
- $redirect_uri = 'https://docs.yunlianhui.cn';////需要更换
-
- $oauth_client = new OAuth2($client_id,$client_secret,$redirect_uri);
+     $client_id = 'YLH'; //需要更换
+     $client_secret = 'YLH123';////需要更换
+     $redirect_uri = 'https://docs.yunlianhui.cn';//需要更换
+     $$client_private_key = 'MIICeAIBA....D';//需要更换
+    
+     $oauth_client = new OAuth2($client_id,$client_secret,$client_private_key,$redirect_uri);
  ```
 
  ## 普通会员授权

@@ -1,7 +1,9 @@
 {
     "name": "mwkj/ylh-open-api-php-client",
     "description": "ylh-open-api-php-client",
-    "require": {},
+    "require": {
+      "php": "^5.3.3 || ^7.0"
+    },
 	"autoload": {
 		"psr-4": {
 			"YunLianHui\\": "src/" 
