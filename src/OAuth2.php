@@ -21,6 +21,12 @@ class OAuth2
     public $client_secret;
 
     /**
+     * client私钥
+     * @var string
+     */
+    public $client_private_key;
+
+    /**
      * 回调地址
      * @var string
      */
@@ -68,12 +74,14 @@ class OAuth2
      * 构造方法
      * @param string $client_id
      * @param string $client_secret
+     * @param string $client_private_key
      * @param string $redirect_uri
      */
-    public function __construct($client_id, $client_secret, $redirect_uri)
+    public function __construct($client_id, $client_secret, $client_private_key, $redirect_uri)
     {
         $this->client_id = $client_id;
         $this->client_secret = $client_secret;
+        $this->client_private_key = $client_private_key;
         $this->redirect_uri = $redirect_uri;
         $this->http = new Request();
     }
@@ -119,6 +127,10 @@ class OAuth2
      */
     protected function generateSign($params, $secretKey)
     {
+        $sign = new Sign([]);
+        $sign->generateSign($params);
+
+
         ksort($params);
         $stringToBeSigned = $secretKey;
         foreach ($params as $k => $v)
@@ -140,6 +152,15 @@ class OAuth2
 	 */
 	public function getAuthUrl($redirect_uri = null, $scope = 'basic_info')
 	{
+
+	    $ret = $this->getUrl('token/authorize', array(
+            'client_id'			=>	$this->client_id,
+            'redirect_uri'		=>	null === $redirect_uri ? $this->redirect_uri : $redirect_uri,
+            'scope'				=>	$scope,
+            'response_type' => 'code',
+            'state'				=>	$this->getState(),
+        ));
+
 		return $this->getUrl('token/authorize', array(
 			'client_id'			=>	$this->client_id,
 			'redirect_uri'		=>	null === $redirect_uri ? $this->redirect_uri : $redirect_uri,

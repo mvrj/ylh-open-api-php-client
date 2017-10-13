@@ -1,0 +1,10 @@
+{
+    "name": "mwkj/ylh-open-api-php-client",
+    "description": "ylh-open-api-php-client",
+    "require": {},
+	"autoload": {
+		"psr-4": {
+			"YunLianHui\\": "src/" 
+			}
+    }
+}
