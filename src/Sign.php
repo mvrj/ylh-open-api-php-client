@@ -13,19 +13,17 @@ class Sign
     //私钥值
     private $rsaPrivateKey;
     // 表单提交字符集编码
-    private $postCharset;
+    private $postCharset = 'UTF-8';
 
-    private $fileCharset;
+    private $fileCharset = 'UTF-8';
 
     /**
      * Sign constructor.
-     * @param $config
+     * @param $rsaPrivateKey
      */
-    public function __construct(array $config = [])
+    public function __construct($rsaPrivateKey)
     {
-        $this->rsaPrivateKey = $config['rsaPrivateKey'];
-        $this->postCharset = $config['postCharset'];
-        $this->fileCharset = $config['fileCharset'];
+        $this->rsaPrivateKey = $rsaPrivateKey;
     }
 
     /**
@@ -50,6 +48,9 @@ class Sign
      *  公钥是否是读取字符串还是读取文件，是根据初始化传入的值判断的。
      **/
     public function rsaCheck($params, $rsaPublicKeyFilePath,$signType='RSA2') {
+        if(isset($params['XDEBUG_SESSION_START'])){
+            $params['XDEBUG_SESSION_START'] = null;
+        }
         $sign = $params['sign'] ?? null;
         $params['sign_type'] = null;
         $params['sign'] = null;

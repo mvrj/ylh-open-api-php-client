@@ -67,18 +67,19 @@ class OAuth2
      * 测试站： https://opentest.yunlianhui.com
      * 正式站： https://open.yunlianhui.com
      */
-    //const API_PREFIX = 'https://open.yunlianhui.com'; //正式站
-    const API_PREFIX = 'https://opentest.yunlianhui.com'; //测试站
+    private $api_prefix ;
 
     /**
      * 构造方法
+     * @param string $api_prefix
      * @param string $client_id
      * @param string $client_secret
      * @param string $client_private_key
      * @param string $redirect_uri
      */
-    public function __construct($client_id, $client_secret, $client_private_key, $redirect_uri)
+    public function __construct($api_prefix,$client_id, $client_secret, $client_private_key, $redirect_uri)
     {
+        $this->api_prefix = $api_prefix;
         $this->client_id = $client_id;
         $this->client_secret = $client_secret;
         $this->client_private_key = $client_private_key;
@@ -95,7 +96,7 @@ class OAuth2
 	 */
 	public function getUrl($name, $params = array())
 	{
-		return static::API_PREFIX . '/' . $name . (empty($params) ? '' : ('?' . \http_build_query($params)));
+		return $this->api_prefix . '/' . $name . (empty($params) ? '' : ('?' . \http_build_query($params)));
 	}
     /**
      * 获取state值
@@ -122,27 +123,13 @@ class OAuth2
     /**
      * 签名
      * @param $params
-     * @param $secretKey
+     * @param $rsaPrivateKey
      * @return string
      */
-    protected function generateSign($params, $secretKey)
+    protected function generateSign($params, $rsaPrivateKey)
     {
-        $sign = new Sign([]);
-        $sign->generateSign($params);
-
-
-        ksort($params);
-        $stringToBeSigned = $secretKey;
-        foreach ($params as $k => $v)
-        {
-            if(is_string($v) && "@" != substr($v, 0, 1))
-            {
-                $stringToBeSigned .= "$k$v";
-            }
-        }
-        unset($k, $v);
-        $stringToBeSigned .= $secretKey;
-        return strtoupper(md5($stringToBeSigned));
+        $sign = new Sign($rsaPrivateKey);
+        return $sign->generateSign($params);
     }
 	/**
 	 *  1） 拼接授权url
@@ -150,18 +137,9 @@ class OAuth2
 	 * @param string $scope 访问的权限，可以多个叠加。如： scope=A+B
 	 * @return string
 	 */
-	public function getAuthUrl($redirect_uri = null, $scope = 'basic_info')
+	public function getAuthorizationUrl($redirect_uri = null, $scope = 'basic_info')
 	{
-
-	    $ret = $this->getUrl('token/authorize', array(
-            'client_id'			=>	$this->client_id,
-            'redirect_uri'		=>	null === $redirect_uri ? $this->redirect_uri : $redirect_uri,
-            'scope'				=>	$scope,
-            'response_type' => 'code',
-            'state'				=>	$this->getState(),
-        ));
-
-		return $this->getUrl('token/authorize', array(
+		return $this->getUrl('oauth/authorize', array(
 			'client_id'			=>	$this->client_id,
 			'redirect_uri'		=>	null === $redirect_uri ? $this->redirect_uri : $redirect_uri,
 			'scope'				=>	$scope,
@@ -184,117 +162,28 @@ class OAuth2
 	 */
 
 
-
     /**
      * 4） 换取access_token
      * @param $code  $redirectUri地址中传过来的code，为null则通过get参数获取
      * @throws ApiException
      * @return mixed
      */
-	public function getAccessToken($code)
+	public function getAccessTokenFromCode($code)
 	{
-		$this->result = json_decode($this->http->post($this->getUrl('token/authorize/accesstoken'),
+        $params =
             [
-			'client_id'		=>	$this->client_id,
-			'client_secret'	=>	$this->client_secret,
-			'grant_type'	=>	'authorization_code',
-			'code'			=>	$code,
-			'redirect_uri'	=>	$this->redirect_uri,
-            ])->body, true);
+                'client_id'		=>	$this->client_id,
+                'client_secret'	=>	$this->client_secret,
+                'grant_type'	=>	'authorization_code',
+                'code'			=>	$code,
+                'redirect_uri'	=>	$this->redirect_uri,
+            ];
 
-		//return $this->result;
-		if(isset($this->result['error']))
-		{
-			throw new ApiException($this->result['error'], $this->result['error_description']);
-		}
-		else
-		{
-			return $this->result['access_token'];
-		}
-	}
-
-	/**
-	 * 获取基本信息
-	 * @param string $access_token
-     * @throws ApiException
-	 * @return mixed
-	 */
-	public function getBasicInfo($access_token = null)
-	{
-
-	    $params = [
-	        'client_id' => $this->client_id,
-            'access_token' => null === $access_token ? $this->access_token : $access_token,
-            'timestamp' => date('Y-m-d H:i:s',time()+8*3600), //取东八区
-        ];
-        $params['sign'] = $this->generateSign($params,$this->client_secret);
-
-		$this->result = json_decode($this->http->post($this->getUrl('api/basic_info'),$params)->body, true);
-		if($this->result['error_code'] !== 0)
-		{
-			throw new ApiException($this->result['error'], $this->result['error_code']);
-		}
-		else
-		{
-			return $this->result;
-		}
-	}
-	/**
-	 * 产生积分返还
-	 * @param string $access_token
-     * @param string $buyer_mobile
-     * @param string $money
-     * @param string $order_msg
-     * @throws ApiException
-	 * @return array
-	 */
-	public function makePoints($access_token = null,$buyer_mobile,$money,$order_msg)
-	{
-        $params = [
-            'client_id' => $this->client_id,
-            'access_token' => null === $access_token ? $this->access_token : $access_token,
-            'buyer_mobile' => $buyer_mobile,
-            'money' => $money,
-            'order_msg' => $order_msg,
-            'timestamp' => date('Y-m-d H:i:s',time()+8*3600), //取东八区
-        ];
-        $params['sign'] = $this->generateSign($params,$this->client_secret);
-
-		$this->result = json_decode($this->http->post($this->getUrl('api/points'),$params)->body, true);
-        if($this->result['error_code'] !== 0)
+        $response = $this->http->post($this->getUrl('token/authorize/accesstoken'),http_build_query($params, null, '&'));
+        $this->result = json_decode($response->getBody(),true);
+        if($response->getHttpResponseCode() !== 200 || (isset($this->result['error_code']) && $this->result['error_code'] !== '0'))
         {
-            throw new ApiException($this->result['error'], $this->result['error_code']);
-        }
-        else
-        {
-            return $this->result;
-        }
-	}
-	/**
-	 * 积分返还撤销
-     * @param string $access_token
-     * @param string $order_id
-     * @param string $reason
-     * @param string $money
-     * @throws ApiException
-	 * @return array
-	 */
-	public function revokePoints($access_token = null,$order_id,$reason,$money)
-	{
-        $params = [
-            'client_id' => $this->client_id,
-            'access_token' => null === $access_token ? $this->access_token : $access_token,
-            'order_id' => $order_id,
-            'reason' => $reason,
-            'money' => $money,
-            'timestamp' => date('Y-m-d H:i:s',time()+8*3600), //取东八区
-        ];
-        $params['sign'] = $this->generateSign($params,$this->client_secret);
-
-        $this->result = json_decode($this->http->post($this->getUrl('api/points_revoke'),$params)->body, true);
-        if($this->result['error_code'] !== 0)
-        {
-            throw new ApiException($this->result['error'], $this->result['error_code']);
+            throw new ApiException($response->getBody(),$response->getHttpResponseCode());
         }
         else
         {
@@ -302,6 +191,29 @@ class OAuth2
         }
 	}
 
+    /**
+     * 发送一个资源请求
+     * @param array $params
+     * @param $url
+     * @return array|mixed
+     * @throws ApiException
+     */
+    public function sendAnResourceRequest(array $params, $url)
+    {
+        $params['sign'] = $this->generateSign($params,$this->client_private_key);
+
+        $response = $this->http->post($this->getUrl($url),http_build_query($params, null, '&'));
+        $this->result = json_decode($response->getBody(),true);
+        if($response->getHttpResponseCode() !== 200 || (isset($this->result['error_code']) && $this->result['error_code'] !== '0'))
+        {
+            throw new ApiException($response->getBody(),$response->getHttpResponseCode());
+        }
+        else
+        {
+            return $this->result;
+        }
+
+    }
 
     /**
      * 客户端获取访问令牌
@@ -317,7 +229,7 @@ class OAuth2
                 'client_secret'	=>	$this->client_secret,
                 'grant_type'	=>	'client_credentials',
                 'scope'			=>	$scope
-            ])->body, true);
+            ])->getBody(), true);
 
         //return $this->result;
         if(isset($this->result['error']))
@@ -327,35 +239,6 @@ class OAuth2
         else
         {
             return $this->result['access_token'];
-        }
-    }
-    /**
-     * 快捷注册，产生临时会员
-     * @param string $access_token
-     * @param string $mobile
-     * @param string $rcm_id
-     * @throws ApiException
-     * @return mixed
-     */
-    public function register_fast($access_token = null,$mobile,$rcm_id)
-    {
-        $params = [
-            'client_id' => $this->client_id,
-            'access_token' => null === $access_token ? $this->access_token : $access_token,
-            'mobile' => $mobile,
-            'rcm_id' => $rcm_id,
-            'timestamp' => date('Y-m-d H:i:s',time()+8*3600), //取东八区
-        ];
-        $params['sign'] = $this->generateSign($params,$this->client_secret);
-
-        $this->result = json_decode($this->http->post($this->getUrl('api/register_fast'),$params)->body, true);
-        if($this->result['error_code'] !== 0)
-        {
-            throw new ApiException($this->result['error'], $this->result['error_code']);
-        }
-        else
-        {
-            return $this->result;
         }
     }
 

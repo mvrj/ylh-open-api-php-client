@@ -1,2 +1,8 @@
 /.idea
+/log.txt
 /vendor/
+/example/pay/datadownload.php
+/example/pay/query.php
+/example/pay/refund.php
+/example/pay/refundquery.php
+/config_upload.php

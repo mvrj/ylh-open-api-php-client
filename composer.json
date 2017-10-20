@@ -2,7 +2,8 @@
     "name": "mwkj/ylh-open-api-php-client",
     "description": "ylh-open-api-php-client",
     "require": {
-      "php": "^5.3.3 || ^7.0"
+        "php": "^5.3.3 || ^7.0",
+        "guzzlehttp/guzzle": "^6.3"
     },
 	"autoload": {
 		"psr-4": {
