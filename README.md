@@ -125,7 +125,7 @@ try{
 ````
 
 ## 红积分/预付款支付demo
- 1. 参考 https://github.com/mwkj/yunlianhui-open-pay-demo
+ 1. 参考 https://github.com/mwkj/ylh-open-pay-php-demo
  
 
  
