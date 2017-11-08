@@ -179,7 +179,7 @@ class OAuth2
                 'redirect_uri'	=>	$this->redirect_uri,
             ];
 
-        $response = $this->http->post($this->getUrl('token/authorize/accesstoken'),http_build_query($params, null, '&'));
+        $response = $this->http->post($this->getUrl('api/v2/oauth/token'),http_build_query($params, null, '&'));
         $this->result = json_decode($response->getBody(),true);
         if($response->getHttpResponseCode() !== 200 || (isset($this->result['error_code']) && $this->result['error_code'] !== '0'))
         {
