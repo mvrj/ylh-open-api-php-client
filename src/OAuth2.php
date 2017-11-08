@@ -177,7 +177,10 @@ class OAuth2
                 'grant_type'	=>	'authorization_code',
                 'code'			=>	$code,
                 'redirect_uri'	=>	$this->redirect_uri,
+                'timestamp' => (string)time(),
             ];
+
+        $params['sign'] = $this->generateSign($params,$this->client_private_key);
 
         $response = $this->http->post($this->getUrl('api/v2/oauth/token'),http_build_query($params, null, '&'));
         $this->result = json_decode($response->getBody(),true);
